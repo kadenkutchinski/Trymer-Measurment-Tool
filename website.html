@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trymer Cutter Management Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Global styling for modern appearance */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* Container with centered alignment and box-shadow */
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Input fields and button styling for better UX */
+        input, select, button {
+            padding: 12px;
+            margin-top: 10px;
+            width: 100%;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* Button hover effect for better feedback */
+        button {
+            background-color: #2d87ff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #1e6fd1;
+            transform: scale(1.05);
+        }
+
+        /* Spacing group improvements with gap for better layout */
+        .spacing-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .spacing-group input {
+            flex: 1;
+        }
+
+        /* Responsive design adjustments for smaller screens */
+        @media (max-width: 600px) {
+            .spacing-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Results section styling */
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #e9f7ff;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-ruler"></i> Trymer Cutter Management Tool</h1>
+
+        <label for="partNumber">Part Number:</label>
+        <input type="text" id="partNumber" placeholder="Enter part number" required>
+
+        <div id="measurementSection" style="display: none;">
+            <label for="firstWireOffset">First Wire Offset:</label>
+            <select id="firstWireOffset">
+                <option value="0.625">5/8ths of an inch above conveyor</option>
+                <option value="0.875">7/8ths of an inch above conveyor</option>
+            </select>
+
+            <label>Wire Measurements (inches):</label>
+            <div class="spacing-group">
+                <input type="text" id="wireSpacing1" placeholder="1st Cutter" required>
+                <input type="text" id="wireSpacing2" placeholder="2nd Cutter" required>
+                <input type="text" id="wireSpacing3" placeholder="3rd Cutter" required>
+            </div>
+
+            <label for="grid1">Select Grid for 1st Cutter:</label>
+            <select id="grid1" required>
+                <option value="">Select Grid</option>
+                <option value="1">Grid 1</option>
+                <option value="2">Grid 2</option>
+                <option value="3">Grid 3</option>
+                <option value="4">Grid 4</option>
+                <option value="5">Grid 5</option>
+                <option value="6">Grid 6</option>
+                <option value="7">Grid 7</option>
+                <option value="8">Grid 8</option>
+            </select>
+
+            <label for="grid2">Select Grid for 2nd Cutter:</label>
+            <select id="grid2" required>
+                <option value="">Select Grid</option>
+                <option value="1">Grid 1</option>
+                <option value="2">Grid 2</option>
+                <option value="3">Grid 3</option>
+                <option value="4">Grid 4</option>
+                <option value="5">Grid 5</option>
+                <option value="6">Grid 6</option>
+                <option value="7">Grid 7</option>
+                <option value="8">Grid 8</option>
+            </select>
+
+            <label for="grid3">Select Grid for 3rd Cutter:</label>
+            <select id="grid3" required>
+                <option value="">Select Grid</option>
+                <option value="1">Grid 1</option>
+                <option value="2">Grid 2</option>
+                <option value="3">Grid 3</option>
+                <option value="4">Grid 4</option>
+                <option value="5">Grid 5</option>
+                <option value="6">Grid 6</option>
+                <option value="7">Grid 7</option>
+                <option value="8">Grid 8</option>
+            </select>
+        </div>
+
+        <button id="saveButton" style="display: none;" onclick="savePart()" aria-live="polite">Save Part</button>
+
+        <div>
+            <label for="savedParts">Load Part Configuration:</label>
+            <select id="savedParts" onchange="loadPart()">
+                <option value="">Select a part number</option>
+            </select>
+        </div>
+
+        <button id="deleteButton" style="margin-top: 10px;" onclick="deletePart()">Delete Selected Part</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const partNumberInput = document.getElementById('partNumber');
+        const measurementSection = document.getElementById('measurementSection');
+        const saveButton = document.getElementById('saveButton');
+        const savedPartsDropdown = document.getElementById('savedParts');
+        const resultDiv = document.getElementById('result');
+
+        partNumberInput.addEventListener('input', () => {
+            measurementSection.style.display = partNumberInput.value.trim() ? 'block' : 'none';
+        });
+
+        document.querySelectorAll('.spacing-group input').forEach(input => {
+            input.addEventListener('input', () => saveButton.style.display = 'block');
+        });
+
+        function savePart() {
+            saveButton.textContent = "Saving...";
+            setTimeout(() => {
+                const partData = {
+                    partNumber: partNumberInput.value,
+                    firstWireOffset: document.getElementById('firstWireOffset').value,
+                    wireSpacing: [
+                        document.getElementById('wireSpacing1').value,
+                        document.getElementById('wireSpacing2').value,
+                        document.getElementById('wireSpacing3').value
+                    ],
+                    grids: [
+                        document.getElementById('grid1').value,
+                        document.getElementById('grid2').value,
+                        document.getElementById('grid3').value
+                    ]
+                };
+                const parts = JSON.parse(localStorage.getItem('partNumbers')) || [];
+                parts.push(partData);
+                localStorage.setItem('partNumbers', JSON.stringify(parts));
+                alert("Part saved successfully!");
+                saveButton.textContent = "Save Part";
+                updateSavedPartsDropdown();
+            }, 1000);
+        }
+
+        function updateSavedPartsDropdown() {
+            const parts = JSON.parse(localStorage.getItem('partNumbers')) || [];
+            savedPartsDropdown.innerHTML = '<option value="">Select a part number</option>';
+            parts.forEach((part, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = part.partNumber;
+                savedPartsDropdown.appendChild(option);
+            });
+        }
+
+        updateSavedPartsDropdown();
+    </script>
+</body>
+</html>
